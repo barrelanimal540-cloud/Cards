@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cards · IELTS</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
+<style>
+:root{--bg:#f7f4f1;--grid:rgba(107,26,59,.06);--ink:#231f2b;--card:#fff;--mute:#6f6a78;--line:#e8e2dc;--bar:#6b1a3b;--rep:#c4577f;--knw:#1f4a40;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16131a;--grid:rgba(255,255,255,.05);--ink:#f1edf5;--card:#221e2a;--mute:#a59fb0;--line:#322c3c;--bar:#4d1230;--rep:#c4577f;--knw:#2f7d68;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#16131a;--grid:rgba(255,255,255,.05);--ink:#f1edf5;--card:#221e2a;--mute:#a59fb0;--line:#322c3c;--bar:#4d1230;--rep:#c4577f;--knw:#2f7d68;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+body{margin:0;background-color:var(--bg);background-image:repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 44px);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bar);z-index:30}
+.hdr{position:relative;overflow:hidden;padding:14px 16px 26px;color:#fff;background:radial-gradient(120% 170% at 100% 0%,#a02a5c 0,transparent 55%),linear-gradient(135deg,var(--bar),#3d0f27)}
+.hdr::before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Cpath d='M22 6l10 10-10 10-10-10z' fill='none' stroke='white' stroke-opacity='.12' stroke-width='1.5'/%3E%3C/svg%3E")}
+.hdr::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,#4a6bb5 0 25%,#e39b3c 25% 50%,#1f4a40 50% 75%,#8a2250 75%)}
+.hdr>*{position:relative}
+button{font:inherit;cursor:pointer}
+@keyframes flyR{from{transform:translate(var(--dx),0) rotate(var(--rot))}to{transform:translate(135%,30px) rotate(24deg);opacity:0}}
+@keyframes flyL{from{transform:translate(var(--dx),0) rotate(var(--rot))}to{transform:translate(-135%,30px) rotate(-24deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const html=htm.bind(React.createElement);
+const {useState,useEffect,useRef}=React;
+const TOP={e:'education',v:'environment',t:'technology',h:'health',w:'work',s:'society',x:'essay'};
+const KEYS=['all','education','environment','technology','health','work','society','essay'];
+// word|topic|definition|example (*bold*)|ru|kk|band
+const RAW=`impact|x|a strong effect that something has on a person or situation|Social media has had a huge *impact* on how teenagers talk.|влияние, воздействие|әсер, ықпал|6.0
+bear a striking resemblance to|x|to look or seem very similar to someone or something|The new phone *bears a striking resemblance to* the old model.|быть поразительно похожим на|-ға таңғаларлықтай ұқсау|7.5
+curriculum|e|the set of subjects taught in a school|The school added coding to its *curriculum* this year.|учебная программа|оқу бағдарламасы|6.0
+tuition fees|e|money paid for lessons at a college or university|Rising *tuition fees* make it hard for some families to study abroad.|плата за обучение|оқу ақысы|6.0
+lifelong learning|e|the habit of gaining new skills throughout life|Online courses make *lifelong learning* easier for adults.|обучение на протяжении жизни|өмір бойы білім алу|6.5
+peer pressure|e|the push to act like others in your age group|Many teenagers try smoking because of *peer pressure*.|давление сверстников|құрдастар қысымы|6.0
+rote learning|e|learning by repeating facts without understanding them|*Rote learning* helps with dates but not with problem solving.|зубрёжка|жаттап алу|7.0
+literacy rate|e|the share of people who can read and write|The country’s *literacy rate* has risen to almost 100 per cent.|уровень грамотности|сауаттылық деңгейі|6.5
+renewable energy|v|power from sources that do not run out, like wind or sun|Kazakhstan is building more wind farms to produce *renewable energy*.|возобновляемая энергия|жаңартылатын энергия|6.0
+carbon footprint|v|the amount of carbon dioxide produced by a person or activity|Cycling to school can reduce your *carbon footprint*.|углеродный след|көміртек ізі|6.5
+deforestation|v|the cutting down of large areas of forest|*Deforestation* destroys the homes of many animals.|вырубка лесов|ормандарды кесу|6.5
+endangered species|v|animals or plants at risk of dying out|The snow leopard is an *endangered species*.|вид под угрозой исчезновения|жойылу қаупі төнген түр|6.5
+global warming|v|the gradual rise in Earth’s temperature|*Global warming* is melting glaciers in the mountains.|глобальное потепление|жаһандық жылыну|5.5
+landfill|v|a place where rubbish is buried|Most plastic bags end up in a *landfill*.|свалка|қоқыс полигоны|7.0
+artificial intelligence|t|computer systems that can do tasks that need human thinking|*Artificial intelligence* can now translate speech in real time.|искусственный интеллект|жасанды интеллект|6.0
+cutting-edge|t|using the newest and most advanced ideas|The lab uses *cutting-edge* equipment to study the weather.|передовой|ең озық|7.0
+cyberbullying|t|using the internet to frighten or hurt someone|Schools should teach students how to deal with *cyberbullying*.|кибербуллинг|кибербуллинг|6.5
+digital divide|t|the gap between people who have internet access and those who do not|Remote villages still suffer from the *digital divide*.|цифровое неравенство|цифрлық теңсіздік|7.0
+outdated|t|no longer modern or useful|Many offices still use *outdated* software.|устаревший|ескірген|6.0
+user-friendly|t|easy for people to learn and use|The app is popular because it is so *user-friendly*.|удобный для пользователя|пайдалануға ыңғайлы|6.0
+balanced diet|h|a mix of foods that gives the body what it needs|A *balanced diet* includes vegetables, protein and grains.|сбалансированное питание|теңдестірілген тамақтану|5.5
+sedentary lifestyle|h|a way of living with very little physical activity|A *sedentary lifestyle* can lead to heart problems.|малоподвижный образ жизни|отырықшы өмір салты|7.0
+obesity|h|a condition of being dangerously overweight|Fast food is one cause of *obesity* in children.|ожирение|семіздік|6.5
+mental well-being|h|the state of feeling calm, happy and able to cope|Regular sleep is important for *mental well-being*.|психическое благополучие|психикалық әл-ауқат|6.5
+life expectancy|h|the number of years a person is likely to live|Better healthcare has increased *life expectancy*.|продолжительность жизни|өмір сүру ұзақтығы|7.0
+immune system|h|the body’s defence against illness|Vitamin C may help to strengthen the *immune system*.|иммунная система|иммундық жүйе|6.5
+job satisfaction|w|the feeling of being happy with your work|Good colleagues increase *job satisfaction*.|удовлетворённость работой|жұмысқа қанағаттану|6.0
+work-life balance|w|a fair share of time between work and personal life|Flexible hours help parents keep a good *work-life balance*.|баланс работы и личной жизни|жұмыс пен жеке өмір теңгерімі|6.5
+unemployment|w|the situation of having no job|*Unemployment* is higher among young people than older workers.|безработица|жұмыссыздық|6.0
+career prospects|w|chances of progress in a future job|A degree can improve your *career prospects*.|карьерные перспективы|мансаптық мүмкіндіктер|6.5
+workforce|w|all the people who work in a company or country|The country needs a skilled *workforce* to grow its economy.|рабочая сила|жұмыс күші|7.0
+entrepreneur|w|someone who starts their own business|The young *entrepreneur* opened a bakery in Atyrau.|предприниматель|кәсіпкер|7.0
+urbanisation|s|the growth of towns and cities|Rapid *urbanisation* has put pressure on public transport.|урбанизация|қалаланудың өсуі|7.0
+generation gap|s|the difference in views between young and old people|The *generation gap* often shows in music and fashion.|разрыв поколений|ұрпақтар арасындағы алшақтық|6.5
+standard of living|s|how comfortable and wealthy people’s lives are|The *standard of living* has improved in many rural areas.|уровень жизни|өмір сүру деңгейі|6.5
+poverty|s|the state of being extremely poor|Education is one way to escape *poverty*.|бедность|кедейлік|5.5
+social media|s|websites and apps where people share content|*Social media* lets friends stay in touch across countries.|социальные сети|әлеуметтік желілер|5.0
+community|s|a group of people living in the same place or sharing interests|The local *community* raised money for a new playground.|сообщество|қауымдастық|5.5
+on the one hand|x|a phrase that introduces the first side of an argument|*On the one hand*, cars are convenient; on the other, they pollute.|с одной стороны|бір жағынан|5.5
+in addition|x|a phrase used to add another point|*In addition*, public transport is cheaper than driving.|кроме того|сонымен қатар|5.5
+as a result|x|a phrase that shows an effect|Prices rose; *as a result*, fewer people bought cars.|в результате|нәтижесінде|5.5
+it is widely believed that|x|a phrase for an opinion that many people share|*It is widely believed that* homework improves results.|широко распространено мнение, что|...деген пікір кең таралған|7.0
+play a crucial role in|x|to be very important in something|Teachers *play a crucial role in* shaping children’s attitudes.|играть решающую роль в|-да шешуші рөл атқару|7.0
+to sum up|x|a phrase that begins a conclusion|*To sum up*, technology has more benefits than drawbacks.|подводя итог|қорыта айтқанда|5.5`;
+const WORDS=RAW.split('\n').map((l,i)=>{const [w,t,d,ex,ru,kk,b]=l.split('|');return {id:i,w,t:TOP[t],d,ex,ru,kk,b}});
+
+const LNG={
+ru:{title:'Карты',tap:'Нажмите, чтобы перевернуть',show:'Показать перевод',hide:'Скрыть перевод',rep:'Повторить',know:'Знаю',done:'На сегодня всё',doneSub:'Вы прошли все карточки. Возвращайтесь завтра!',left:'Осталось',learned:'Выучено',reset:'Сбросить прогресс',reset2:'Нажмите ещё раз',swipe:'Свайп вправо — Знаю, влево — Повторить',listen:'Прослушать',
+ topics:['Все','Образование','Экология','Технологии','Здоровье','Работа','Общество','Язык эссе']},
+kk:{title:'Карталар',tap:'Аудару үшін басыңыз',show:'Аударманы көрсету',hide:'Аударманы жасыру',rep:'Қайталау',know:'Білемін',done:'Бүгінге болды',doneSub:'Барлық карточкаларды өттіңіз. Ертең қайта келіңіз!',left:'Қалды',learned:'Үйренілді',reset:'Прогресті тазарту',reset2:'Қайта басыңыз',swipe:'Оңға — Білемін, солға — Қайталау',listen:'Тыңдау',
+ topics:['Барлығы','Білім','Экология','Технология','Денсаулық','Жұмыс','Қоғам','Эссе тілі']},
+en:{title:'Cards',tap:'Tap to flip',show:'Show translation',hide:'Hide translation',rep:'Repeat',know:'Know',done:'All done for today',doneSub:'You have gone through every card. Come back tomorrow!',left:'Left',learned:'Learned',reset:'Reset progress',reset2:'Tap again',swipe:'Swipe right = Know, left = Repeat',listen:'Listen',
+ topics:['All','Education','Environment','Technology','Health','Work','Society','Essay language']}};
+
+const LOGO="data:image/jpeg;base64,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";
+const DAY=864e5,DAYS=[1,3,7,14,30],PAL=['#e39b3c','#4a6bb5','#8a2250','#2a8c82','#b4532a'];
+const today=()=>new Date().toDateString();
+function load(){try{const r=JSON.parse(localStorage.getItem('cards-v1'));if(r&&r.cards)return Object.assign({lang:'ru',topic:'all',nd:{d:'',n:0}},r)}catch(e){}return {lang:'ru',topic:'all',cards:{},nd:{d:'',n:0}}}
+function save(s){try{localStorage.setItem('cards-v1',JSON.stringify(s))}catch(e){}}
+function build(cards,topic,nd){
+  const now=Date.now(),n0=nd.d===today()?nd.n:0,ok=w=>topic==='all'||w.t===topic;
+  const rev=WORDS.filter(w=>ok(w)&&cards[w.id]&&cards[w.id].d<=now).sort((a,b)=>cards[a.id].d-cards[b.id].d);
+  const fresh=WORDS.filter(w=>ok(w)&&!cards[w.id]).slice(0,Math.max(0,20-n0));
+  return rev.concat(fresh).map(w=>w.id);
+}
+function speak(t){try{const s=window.speechSynthesis;if(!s)return;s.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';u.rate=.9;const v=s.getVoices().filter(x=>/en[-_]GB/i.test(x.lang));if(v.length)u.voice=v[0];s.speak(u)}catch(e){}}
+const fs=w=>w.length<=9?'clamp(48px,17vw,78px)':w.length<=14?'clamp(38px,12vw,56px)':w.length<=22?'clamp(30px,9vw,42px)':'clamp(24px,7.2vw,32px)';
+const ex=s=>s.split('*').map((x,i)=>i%2?html`<b key=${i}>${x}</b>`:x);
+const FACE={backfaceVisibility:'hidden',WebkitBackfaceVisibility:'hidden'};
+const POS=['translate(0px,0px)','translate(-6px,12px) rotate(-5deg) scale(.965)','translate(8px,22px) rotate(6deg) scale(.93)','translate(0px,40px) rotate(-2deg) scale(.9)'];
+
+function CardView({w,p,flipped,dx=0,drag,hand,L,lang,showTr,setShowTr,ghost}){
+  const top=p===0,color=PAL[(w.id*3)%5],q=Math.min(p,3);
+  const st=ghost?{zIndex:6,pointerEvents:'none','--dx':ghost.dx+'px','--rot':ghost.dx/18+'deg',animation:'fly'+(ghost.know?'R':'L')+' .46s cubic-bezier(.5,0,.9,.6) forwards'}
+    :{zIndex:4-q,opacity:p>=3?0:1,transform:top?'translate('+dx+'px,0) rotate('+dx/18+'deg)':POS[q],transition:drag?'none':'transform .55s cubic-bezier(.2,.8,.2,1),opacity .4s'};
+  const tr=lang==='ru'?w.ru:lang==='kk'?w.kk:w.ru+' · '+w.kk;
+  const on=top||ghost;
+  return html`<div className="absolute inset-0" style=${{...st,perspective:1400,touchAction:top&&!ghost?'pan-y':'auto'}} ...${top&&!ghost?hand:{}}>
+    ${top&&!ghost&&html`<${React.Fragment}><div className="absolute z-10 top-4 left-4 rounded-xl bg-[var(--knw)] px-3 py-1 text-sm font-black text-white -rotate-6" style=${{opacity:Math.max(0,Math.min(1,dx/90))}}>${L.know}</div>
+    <div className="absolute z-10 top-4 right-4 rounded-xl bg-[var(--rep)] px-3 py-1 text-sm font-black text-white rotate-6" style=${{opacity:Math.max(0,Math.min(1,-dx/90))}}>${L.rep}</div><//>`}
+    <div className="absolute inset-0" style=${{transformStyle:'preserve-3d',transition:'transform .6s cubic-bezier(.4,.2,.2,1)',transform:'rotateY('+(flipped?180:0)+'deg)'}}>
+      <div className="absolute inset-0 overflow-hidden rounded-[24px] border border-[var(--line)] shadow-[0_14px_30px_rgba(61,15,39,.22)]" style=${{...FACE,background:on?'#0b0b0b':color,transition:'background-color .5s'}}>
+        <div className="flex h-full flex-col items-center justify-center px-5 text-center" style=${{opacity:on?1:0,transition:'opacity .4s .12s'}}>
+          <span className="absolute left-5 top-4 text-xs font-bold uppercase tracking-widest text-white/50">${L.topics[KEYS.indexOf(w.t)]}</span>
+          <span className="mb-4 rounded-full border-2 border-[#e39b3c] px-3 py-1 text-xs font-black tracking-wide text-[#e39b3c]">Band ${w.b}</span>
+          <span className="font-black leading-[1.02] tracking-tight text-white [overflow-wrap:anywhere]" style=${{fontSize:fs(w.w)}}>${w.w}</span>
+          <span className="absolute bottom-4 text-xs text-white/40">${L.tap}</span>
+        </div>
+      </div>
+      <div className="absolute inset-0 overflow-y-auto rounded-[24px] border border-[var(--line)] bg-[var(--card)] text-[var(--ink)] shadow-[0_14px_30px_rgba(61,15,39,.22)]" style=${{...FACE,transform:'rotateY(180deg)'}}>
+        <div className="flex min-h-full flex-col gap-3 p-5">
+          <div className="flex items-start justify-between gap-2">
+            <div><span className="text-xs font-black tracking-wide text-[#e39b3c]">Band ${w.b}</span><h3 className="text-2xl font-black leading-tight">${w.w}</h3></div>
+            <button data-nodrag="1" aria-label=${L.listen} onClick=${e=>{e.stopPropagation();speak(w.w)}} className="shrink-0 rounded-full bg-[var(--bar)] px-3 py-1 text-lg text-white shadow active:scale-95">🔊</button>
+          </div>
+          <p className="text-[15px] leading-snug text-[var(--mute)]">${w.d}</p>
+          <p className="border-l-4 border-[#e39b3c] pl-3 text-[15px] leading-snug">${ex(w.ex)}</p>
+          <div className="mt-auto pt-2">
+            ${showTr?html`<button data-nodrag="1" onClick=${()=>setShowTr(false)} className="w-full rounded-2xl border border-dashed border-[var(--bar)] bg-[#e39b3c]/20 px-3 py-2.5 text-left text-base font-bold">${tr}<span className="block text-xs font-medium text-[var(--mute)]">${L.hide}</span></button>`
+            :html`<button data-nodrag="1" onClick=${()=>setShowTr(true)} className="w-full rounded-2xl bg-[var(--bar)] px-3 py-2.5 text-sm font-bold text-white active:scale-[.98]">${L.show}</button>`}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function App(){
+  const [S,setS]=useState(load);
+  const [queue,setQueue]=useState(()=>build(S.cards,S.topic,S.nd));
+  const [flipped,setFlipped]=useState(false),[showTr,setShowTr]=useState(false),[dx,setDx]=useState(0),[drag,setDrag]=useState(false),[ghost,setGhost]=useState(null),[rs,setRs]=useState(false);
+  const busy=useRef(false),rep=useRef(new Set()),g=useRef({on:false,moved:false,x:0,y:0,dx:0});
+  const L=LNG[S.lang]||LNG.ru,lang=LNG[S.lang]?S.lang:'ru',topId=queue[0];
+  useEffect(()=>{document.documentElement.lang=lang==='kk'?'kk':lang},[lang]);
+  useEffect(()=>{setFlipped(false);setShowTr(false)},[topId]);
+
+  function commit(ns){setS(ns);save(ns)}
+  function answer(know,dxv){
+    if(busy.current||!queue.length)return;
+    busy.current=true;setTimeout(()=>{busy.current=false},320);
+    const id=queue[0],now=Date.now(),prev=S.cards[id],cards={...S.cards};
+    let nd=S.nd.d===today()?{...S.nd}:{d:today(),n:0};
+    if(!prev)nd.n++;
+    const q=queue.slice(1);
+    if(know){const b=rep.current.has(id)?1:Math.min((prev?prev.b:0)+1,5);cards[id]={b,d:now+DAYS[b-1]*DAY};rep.current.delete(id)}
+    else{cards[id]={b:0,d:0};rep.current.add(id);q.splice(Math.min(3,q.length),0,id)}
+    setGhost({id,know,flipped,dx:dxv||0});setTimeout(()=>setGhost(null),480);
+    setQueue(q);setFlipped(false);setShowTr(false);setDx(0);
+    commit({...S,cards,nd});
+  }
+  const ar=useRef();ar.current=answer;
+  useEffect(()=>{const h=e=>{if(e.key==='ArrowRight')ar.current(true);else if(e.key==='ArrowLeft')ar.current(false)};window.addEventListener('keydown',h);return ()=>window.removeEventListener('keydown',h)},[]);
+
+  const hand={
+    onPointerDown:e=>{if(e.target.closest('[data-nodrag]'))return;g.current={on:true,moved:false,x:e.clientX,y:e.clientY,dx:0};try{e.currentTarget.setPointerCapture(e.pointerId)}catch(x){}},
+    onPointerMove:e=>{const c=g.current;if(!c.on)return;const d=e.clientX-c.x,dy=e.clientY-c.y;if(!c.moved&&Math.abs(d)>8&&Math.abs(d)>Math.abs(dy)){c.moved=true;setDrag(true)}if(c.moved){c.dx=d;setDx(d)}},
+    onPointerUp:()=>{const c=g.current;if(!c.on)return;c.on=false;setDrag(false);if(c.moved){if(Math.abs(c.dx)>90)answer(c.dx>0,c.dx);else setDx(0)}else setFlipped(f=>!f)},
+    onPointerCancel:()=>{g.current.on=false;setDrag(false);setDx(0)}
+  };
+  function pick(t){const ns={...S,topic:t};commit(ns);setQueue(build(ns.cards,t,ns.nd));setFlipped(false);setShowTr(false)}
+  function doReset(){if(!rs){setRs(true);setTimeout(()=>setRs(false),2500);return}rep.current=new Set();const ns={lang:S.lang,topic:S.topic,cards:{},nd:{d:'',n:0}};commit(ns);setQueue(build({},ns.topic,ns.nd));setRs(false)}
+  const learned=Object.values(S.cards).filter(c=>c.b>=1).length;
+
+  return html`<div>
+    <header className="hdr">
+      <div className="flex items-center justify-between gap-3">
+        <span className="rounded-[14px] bg-white px-3 py-1 shadow-[0_6px_16px_rgba(0,0,0,.28)]"><img src=${LOGO} alt="Farabi — Atyrau International School" className="block h-[52px] w-auto"/></span>
+        <div className="flex gap-1.5">${['ru','kk','en'].map(k=>html`<button key=${k} onClick=${()=>commit({...S,lang:k})} className=${'rounded-full border border-white/50 px-3 py-1 text-xs font-bold '+(k===lang?'bg-white text-[var(--bar)]':'bg-white/10 text-white')}>${k==='kk'?'ҚАЗ':k.toUpperCase()}</button>`)}</div>
+      </div>
+      <h1 className="mt-4 text-[clamp(60px,20vw,104px)] font-black leading-[.9] tracking-tight">${L.title}</h1>
+      <p className="mt-3 text-sm font-semibold italic">“Practice makes perfect… suii” <span className="not-italic opacity-75">— Cristiano Ronaldo</span></p>
+    </header>
+    <main className="mx-auto max-w-md px-4 pb-10">
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 py-4 [scrollbar-width:none]">${KEYS.map((k,i)=>html`<button key=${k} onClick=${()=>pick(k)} className=${'whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm font-semibold '+(k===S.topic?'border-[var(--bar)] bg-[var(--bar)] text-white':'border-[var(--line)] bg-[var(--card)]')}>${L.topics[i]}</button>`)}</div>
+      <div className="mb-5 flex justify-between text-xs font-bold text-[var(--mute)]"><span>${L.left}: ${queue.length}</span><span>${L.learned}: ${learned}/${WORDS.length}</span></div>
+      ${queue.length||ghost?html`<div className="relative mx-auto h-[clamp(330px,50dvh,470px)] w-[min(88vw,380px)]">
+        ${queue.slice(0,4).map((id,p)=>html`<${CardView} key=${id} w=${WORDS[id]} p=${p} flipped=${p===0&&flipped} dx=${dx} drag=${drag} hand=${hand} L=${L} lang=${lang} showTr=${showTr} setShowTr=${setShowTr}/>`)}
+        ${ghost&&html`<${CardView} key=${'g'+ghost.id} w=${WORDS[ghost.id]} p=${0} flipped=${ghost.flipped} L=${L} lang=${lang} ghost=${ghost} showTr=${false} setShowTr=${()=>{}}/>`}
+      </div>`:html`<div className="mx-auto mt-2 w-[min(88vw,380px)] rounded-[24px] border border-[var(--line)] bg-[var(--card)] p-8 text-center shadow-[0_14px_30px_rgba(61,15,39,.18)]"><div className="text-5xl">🎉</div><h2 className="mt-3 text-3xl font-black">${L.done}</h2><p className="mt-2 text-[var(--mute)]">${L.doneSub}</p></div>`}
+      <div className="mx-auto mt-12 grid w-[min(88vw,380px)] grid-cols-2 gap-3">
+        <button disabled=${!queue.length} onClick=${()=>answer(false)} className="rounded-2xl bg-[var(--rep)] py-4 text-lg font-black text-white shadow-[0_8px_18px_rgba(138,34,80,.3)] active:scale-[.97] disabled:opacity-40">${L.rep}</button>
+        <button disabled=${!queue.length} onClick=${()=>answer(true)} className="rounded-2xl bg-[var(--knw)] py-4 text-lg font-black text-white shadow-[0_8px_18px_rgba(31,74,64,.3)] active:scale-[.97] disabled:opacity-40">${L.know}</button>
+      </div>
+      <p className="mt-5 text-center text-xs text-[var(--mute)]">${L.swipe}</p>
+      <div className="mt-3 text-center"><button onClick=${doReset} className="text-xs font-bold text-[var(--mute)] underline">${rs?L.reset2:L.reset}</button></div>
+    </main>
+  </div>`;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App}/>`);
+</script>
+</body>
+</html>
